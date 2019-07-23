@@ -1,0 +1,23 @@
+- name: Run browbeat infrared plugin
+  hosts: tester
+  gather_facts: yes
+  any_errors_fatal: yes
+  tasks:
+    - include_role:
+        name: version-discovery
+      vars:
+         discovery_types:
+             - rhos_release_file
+      delegate_to: "{{ groups.undercloud[0] }}"
+
+    - name: Setup browbeat
+      include: tasks/setup_browbeat.yml
+      tags:
+        - install
+      when: test.install
+
+    - name: Install Monitoring
+      include: tasks/setup_monitoring.yml
+      tags:
+        - monitor
+      when: test.monitor

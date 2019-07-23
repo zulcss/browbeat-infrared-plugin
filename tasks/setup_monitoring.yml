@@ -1,0 +1,6 @@
+---
+- name: Setup collectd monitoring
+  shell: |
+    ansible-playbook -i hosts install/collectd-openstack.yml
+  args:
+    chdir: "{{ ansible_user_dir }}/browbeat/ansible"

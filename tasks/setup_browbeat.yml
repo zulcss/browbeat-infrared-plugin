@@ -1,0 +1,33 @@
+---
+- name: Clone browbeat repository
+  git:
+     repo: https://git.openstack.org/openstack/browbeat
+     dest: "{{ ansible_user_dir }}/browbeat"
+
+- name: Get browbeat inventory patch
+  shell: |
+      git fetch https://review.opendev.org/x/browbeat refs/changes/02/669202/4 && git cherry-pick FETCH_HEAD
+  args:
+    chdir: "{{ ansible_user_dir }}/browbeat"
+
+
+- name: Execute tripleo hostfile script
+  shell: |
+      ./generate_tripleo_hostfile.sh -t localhost
+  args:
+    chdir: "{{ ansible_user_dir }}/browbeat/ansible"
+  when: undercloud_version|openstack_release < 15
+
+- name: Execute browbeat inventory playbook
+  shell:
+      ansible-playbook -e browbeat_host=localhost install/inventory.yml
+  args:
+    chdir: "{{ ansible_user_dir }}/browbeat/ansible"
+  when: undercloud_version|openstack_release == 15
+
+- name: Install browbeat
+  shell:
+    ansible-playbook -v -i hosts install/browbeat.yml
+  args:
+    chdir: "{{ ansible_user_dir }}/browbeat/ansible"
+
